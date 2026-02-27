@@ -1,0 +1,620 @@
+.table {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(15, 22, 32, 0.95);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+
+.balance {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.balanceLabel {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.balanceValue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #8ae88a;
+}
+
+.countArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.countLabel {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+}
+
+.statsBtn {
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.statsBtn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.felt {
+  flex: 1;
+  background: radial-gradient(ellipse 120% 80% at 50% 50%, #0d5c2e 0%, #0a3d1f 50%, #062d16 100%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: relative;
+  border-radius: 0 0 12px 12px;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.2);
+}
+
+.dealerArea,
+.playerArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.dealerArea {
+  min-height: 140px;
+}
+
+.areaLabel {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hand {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0;
+  min-height: 100px;
+}
+
+.dealerArea .handValue,
+.handValue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+
+.playerArea .hand {
+  justify-content: center;
+}
+
+.hands {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.playerHandWrap {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.15);
+  border: 2px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.playerHandWrap.active {
+  border-color: rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.25);
+}
+
+.handMeta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.betChip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #ffd54f;
+  font-weight: 600;
+}
+
+.betControls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.deckSelector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.deckLabel {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.8);
+}
+
+.deckButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.deckBtn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.2);
+  color: rgba(255,255,255,0.9);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.deckBtn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.deckBtnActive {
+  background: rgba(255,213,79,0.35);
+  border-color: rgba(255,213,79,0.7);
+  color: #ffd54f;
+}
+
+/* Bet circle on the felt (Stake-style) */
+.betSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.betCircle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 3px dashed rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.betCircle:hover {
+  background: rgba(0,0,0,0.35);
+  border-color: rgba(255,255,255,0.55);
+}
+
+.betCircle:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,213,79,0.6);
+}
+
+.betCircleTotal {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffd54f;
+}
+
+.betCircleHint {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.7);
+}
+
+.betSectionInPlay .betCircle {
+  pointer-events: none;
+}
+
+.betCircleInPlay {
+  cursor: default;
+  border-style: solid;
+  border-color: rgba(255,255,255,0.35);
+}
+
+.betActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Chips right under the bet circle */
+.chipTrayInline {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== Casino chip base ===== */
+.chipTrayChip {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+  user-select: none;
+  position: relative;
+  border: 3px solid;
+  box-shadow:
+    0 4px 10px rgba(0,0,0,0.5),
+    0 1px 3px rgba(0,0,0,0.3),
+    inset 0 1px 2px rgba(255,255,255,0.25),
+    inset 0 -2px 3px rgba(0,0,0,0.2);
+}
+
+/* Inner ring (like real casino chips) */
+.chipTrayChip::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1.5px dashed;
+  border-color: inherit;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Edge dashes (the colored notches around the rim) */
+.chipTrayChip::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg 8deg,
+    currentColor 8deg 12deg,
+    transparent 12deg 20deg
+  );
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.chipTrayChip:hover:not(.chipDisabled) {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.5),
+    0 2px 5px rgba(0,0,0,0.3),
+    inset 0 1px 2px rgba(255,255,255,0.3),
+    inset 0 -2px 3px rgba(0,0,0,0.2);
+}
+
+.chipTrayChip.chipSelected {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 0 0 3px rgba(255,213,79,0.6),
+    0 6px 20px rgba(0,0,0,0.5),
+    inset 0 1px 2px rgba(255,255,255,0.3);
+}
+
+.chipTrayChip.chipDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: saturate(0.5);
+}
+
+.chipTrayChip:focus {
+  outline: none;
+}
+
+.chipTrayChip:focus-visible {
+  outline: 2px solid rgba(255,213,79,0.8);
+  outline-offset: 2px;
+}
+
+/* ===== Chip colors (traditional casino) ===== */
+
+/* $1 – white */
+.chip1 {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e8e4dc 60%, #cdc5b8 100%);
+  border-color: #b8b0a4;
+  color: #3a3028;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* $5 – red */
+.chip5 {
+  background: radial-gradient(circle at 35% 35%, #ef5350 0%, #c62828 60%, #8e1a1a 100%);
+  border-color: #d44040;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* $10 – blue */
+.chip10 {
+  background: radial-gradient(circle at 35% 35%, #42a5f5 0%, #1565c0 60%, #0d3b6e 100%);
+  border-color: #2e8ad6;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* $25 – green */
+.chip25 {
+  background: radial-gradient(circle at 35% 35%, #4caf50 0%, #2e7d32 60%, #1a4d1e 100%);
+  border-color: #3a9c3f;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* $100 – black */
+.chip100 {
+  background: radial-gradient(circle at 35% 35%, #424242 0%, #1a1a1a 60%, #000000 100%);
+  border-color: #555;
+  color: #f5f5f5;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+.betTotal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 32px;
+}
+
+.betTotalLabel {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.8);
+}
+
+.betTotalValue {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffd54f;
+}
+
+.clearBetBtn {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.9);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.clearBetBtn:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.primaryBtn {
+  padding: 12px 32px;
+  background: linear-gradient(180deg, #c9a227 0%, #a8841e 100%);
+  border: none;
+  border-radius: 10px;
+  color: #1a1a1a;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.actionBtn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 20px;
+  min-width: 72px;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.35);
+  color: #fff;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.actionBtn:hover {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.actionSymbol {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.actionLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+}
+
+.actionHit {
+  border-color: rgba(100, 200, 120, 0.5);
+  color: #8ae88a;
+}
+.actionHit:hover {
+  border-color: rgba(100, 200, 120, 0.8);
+  background: rgba(100, 200, 120, 0.15);
+}
+
+.actionStand {
+  border-color: rgba(255, 180, 80, 0.5);
+  color: #ffb454;
+}
+.actionStand:hover {
+  border-color: rgba(255, 180, 80, 0.8);
+  background: rgba(255, 180, 80, 0.12);
+}
+
+.actionDouble {
+  border-color: rgba(255, 213, 79, 0.6);
+  color: #ffd54f;
+}
+.actionDouble:hover {
+  border-color: rgba(255, 213, 79, 0.9);
+  background: rgba(255, 213, 79, 0.12);
+}
+
+.actionSplit {
+  border-color: rgba(150, 180, 255, 0.5);
+  color: #96b4ff;
+}
+.actionSplit:hover {
+  border-color: rgba(150, 180, 255, 0.8);
+  background: rgba(150, 180, 255, 0.12);
+}
+
+.resultBanner {
+  margin-top: 10px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.resultWin {
+  color: #6bc98a;
+  text-shadow: 0 0 20px rgba(107, 201, 138, 0.4);
+}
+
+.resultLoss {
+  color: #e07a7a;
+}
+
+.resultPush {
+  color: rgba(255,255,255,0.75);
+}
+
+.resultActions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.resultHint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+}
+
+.shuffleBanner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  padding: 16px 28px;
+  background: rgba(20, 25, 35, 0.98);
+  border: 2px solid rgba(255,213,79,0.5);
+  border-radius: 12px;
+  color: #ffd54f;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: shufflePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes shufflePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+.newShoeBtn {
+  padding: 8px 18px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.9);
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.newShoeBtn:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.45);
+}

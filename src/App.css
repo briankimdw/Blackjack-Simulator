@@ -1,0 +1,28 @@
+.app {
+  min-height: 100vh;
+  background: #0f1620;
+  color: #e8e8e8;
+}
+
+.appHeader {
+  text-align: center;
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.appHeader h1 {
+  margin: 0 0 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.appHeader p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
