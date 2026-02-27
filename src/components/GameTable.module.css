@@ -1,100 +1,183 @@
 .table {
   position: relative;
   width: 100%;
-  max-width: 720px;
+  max-width: 920px;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.topBar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: rgba(15, 22, 32, 0.95);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  flex-shrink: 0;
-}
-
-.balance {
+/* ===== Felt (the playing surface) ===== */
+.felt {
+  flex: 1;
+  position: relative;
+  /* Rich green felt gradient */
+  background:
+    /* Subtle felt texture */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.015) 2px,
+      rgba(0,0,0,0.015) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.01) 2px,
+      rgba(0,0,0,0.01) 4px
+    ),
+    radial-gradient(ellipse 130% 90% at 50% 45%, #1a7a3a 0%, #0e5c2a 30%, #0a4a22 55%, #073818 80%, #052d13 100%);
+  /* Table shape: arched top, slight bottom radius */
+  border-radius: 50% 50% 12px 12px / 18% 18% 12px 12px;
+  /* Padded rail border */
+  border: 10px solid #5c3a1e;
+  border-bottom-width: 8px;
+  /* Depth and shadows */
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,0.2),
+    inset 0 0 20px rgba(0,0,0,0.1),
+    0 0 0 2px #3d2510,
+    0 0 0 4px #7a5a2e,
+    0 0 0 6px #3d2510,
+    0 8px 40px rgba(0,0,0,0.5);
+  padding: 36px 32px 28px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 20px;
+  min-height: 560px;
 }
 
-.balanceLabel {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.5);
+/* ===== Info panel (glassmorphism) ===== */
+.infoPanel {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  min-width: 180px;
+}
+
+.infoPanelName {
+  font-size: 0.7rem;
+  color: rgba(255,213,79,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-align: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.infoPanelRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.infoItemLabel {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.45);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.balanceValue {
+.infoItemValue {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: #8ae88a;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-.countArea {
+.infoItemDivider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,0.1);
+}
+
+.infoPanelBtns {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-.countLabel {
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.5);
-  text-transform: uppercase;
-}
-
-.statsBtn {
-  padding: 8px 16px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: #fff;
+.infoPanelBtn {
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  line-height: 1;
 }
 
-.statsBtn:hover {
+.infoPanelBtn:hover {
   background: rgba(255,255,255,0.12);
   border-color: rgba(255,255,255,0.2);
+  transform: scale(1.05);
 }
 
-.felt {
-  flex: 1;
-  background: radial-gradient(ellipse 120% 80% at 50% 50%, #0d5c2e 0%, #0a3d1f 50%, #062d16 100%);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  position: relative;
-  border-radius: 0 0 12px 12px;
-  box-shadow: inset 0 0 80px rgba(0,0,0,0.2);
+/* ===== Curved rules text (SVG) ===== */
+.curvedTextSvg {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88%;
+  max-width: 720px;
+  pointer-events: none;
+  z-index: 1;
 }
 
+/* ===== Decorative arc separator ===== */
+.tableArc {
+  width: 80%;
+  height: 18px;
+  margin: -4px auto;
+  border: none;
+  border-top: 1.5px solid rgba(212, 175, 55, 0.12);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  pointer-events: none;
+}
+
+/* ===== Dealer & Player areas ===== */
 .dealerArea,
 .playerArea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .dealerArea {
-  min-height: 140px;
+  min-height: 170px;
 }
 
 .areaLabel {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.55);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -104,13 +187,13 @@
   justify-content: center;
   flex-wrap: nowrap;
   gap: 0;
-  min-height: 100px;
+  min-height: 140px;
 }
 
 .dealerArea .handValue,
 .handValue {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: rgba(255,255,255,0.9);
 }
@@ -127,7 +210,7 @@
 }
 
 .playerHandWrap {
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-radius: 12px;
   background: rgba(0,0,0,0.15);
   border: 2px solid transparent;
@@ -154,57 +237,7 @@
   font-weight: 600;
 }
 
-.betControls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  margin-top: 8px;
-}
-
-.deckSelector {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.deckLabel {
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.8);
-}
-
-.deckButtons {
-  display: flex;
-  gap: 6px;
-}
-
-.deckBtn {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.25);
-  background: rgba(0,0,0,0.2);
-  color: rgba(255,255,255,0.9);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.deckBtn:hover {
-  background: rgba(255,255,255,0.15);
-  border-color: rgba(255,255,255,0.4);
-}
-
-.deckBtnActive {
-  background: rgba(255,213,79,0.35);
-  border-color: rgba(255,213,79,0.7);
-  color: #ffd54f;
-}
-
-/* Bet circle on the felt (Stake-style) */
+/* ===== Bet section ===== */
 .betSection {
   display: flex;
   flex-direction: column;
@@ -213,24 +246,26 @@
   margin-top: 8px;
 }
 
+/* ===== Bet circle with chip stack ===== */
 .betCircle {
-  width: 140px;
-  height: 140px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  border: 3px dashed rgba(255,255,255,0.4);
-  background: rgba(0,0,0,0.25);
+  border: 3px dashed rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 0;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  position: relative;
 }
 
 .betCircle:hover {
-  background: rgba(0,0,0,0.35);
-  border-color: rgba(255,255,255,0.55);
+  background: rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.5);
 }
 
 .betCircle:focus {
@@ -238,16 +273,101 @@
   box-shadow: 0 0 0 2px rgba(255,213,79,0.6);
 }
 
-.betCircleTotal {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #ffd54f;
+.betCircleEmpty {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-.betCircleHint {
+/* Chip stack inside bet circle */
+.chipStack {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.stackedChip {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2.5px solid;
+  left: 0;
+  box-shadow:
+    0 1px 4px rgba(0,0,0,0.5),
+    inset 0 1px 1px rgba(255,255,255,0.2);
+}
+
+/* Inner dashed ring on stacked chip */
+.stackedChip::before {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1.5px dashed;
+  border-color: inherit;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Edge notches on stacked chip */
+.stackedChip::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg 8deg,
+    currentColor 8deg 12deg,
+    transparent 12deg 20deg
+  );
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Stacked chip denomination colors */
+.chipColor1 {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e8e4dc 60%, #cdc5b8 100%);
+  border-color: #b8b0a4;
+  color: #3a3028;
+}
+
+.chipColor5 {
+  background: radial-gradient(circle at 35% 35%, #ef5350 0%, #c62828 60%, #8e1a1a 100%);
+  border-color: #d44040;
+  color: #fff;
+}
+
+.chipColor10 {
+  background: radial-gradient(circle at 35% 35%, #42a5f5 0%, #1565c0 60%, #0d3b6e 100%);
+  border-color: #2e8ad6;
+  color: #fff;
+}
+
+.chipColor25 {
+  background: radial-gradient(circle at 35% 35%, #4caf50 0%, #2e7d32 60%, #1a4d1e 100%);
+  border-color: #3a9c3f;
+  color: #fff;
+}
+
+.chipColor100 {
+  background: radial-gradient(circle at 35% 35%, #424242 0%, #1a1a1a 60%, #000000 100%);
+  border-color: #555;
+  color: #f5f5f5;
+}
+
+.chipStackTotal {
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
-  color: rgba(255,255,255,0.7);
+  font-weight: 700;
+  color: #ffd54f;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  z-index: 20;
+  margin-top: -2px;
 }
 
 .betSectionInPlay .betCircle {
@@ -257,7 +377,7 @@
 .betCircleInPlay {
   cursor: default;
   border-style: solid;
-  border-color: rgba(255,255,255,0.35);
+  border-color: rgba(255,255,255,0.25);
 }
 
 .betActions {
@@ -268,7 +388,7 @@
   gap: 10px;
 }
 
-/* Chips right under the bet circle */
+/* ===== Chip tray ===== */
 .chipTrayInline {
   display: flex;
   justify-content: center;
@@ -276,7 +396,7 @@
   flex-wrap: wrap;
 }
 
-/* ===== Casino chip base ===== */
+/* ===== Casino chip base (tray) ===== */
 .chipTrayChip {
   width: 54px;
   height: 54px;
@@ -299,7 +419,6 @@
     inset 0 -2px 3px rgba(0,0,0,0.2);
 }
 
-/* Inner ring (like real casino chips) */
 .chipTrayChip::before {
   content: '';
   position: absolute;
@@ -311,7 +430,6 @@
   pointer-events: none;
 }
 
-/* Edge dashes (the colored notches around the rim) */
 .chipTrayChip::after {
   content: '';
   position: absolute;
@@ -359,9 +477,7 @@
   outline-offset: 2px;
 }
 
-/* ===== Chip colors (traditional casino) ===== */
-
-/* $1 – white */
+/* ===== Chip colors (tray) ===== */
 .chip1 {
   background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e8e4dc 60%, #cdc5b8 100%);
   border-color: #b8b0a4;
@@ -369,7 +485,6 @@
   text-shadow: 0 1px 0 rgba(255,255,255,0.9);
 }
 
-/* $5 – red */
 .chip5 {
   background: radial-gradient(circle at 35% 35%, #ef5350 0%, #c62828 60%, #8e1a1a 100%);
   border-color: #d44040;
@@ -377,7 +492,6 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
-/* $10 – blue */
 .chip10 {
   background: radial-gradient(circle at 35% 35%, #42a5f5 0%, #1565c0 60%, #0d3b6e 100%);
   border-color: #2e8ad6;
@@ -385,7 +499,6 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
-/* $25 – green */
 .chip25 {
   background: radial-gradient(circle at 35% 35%, #4caf50 0%, #2e7d32 60%, #1a4d1e 100%);
   border-color: #3a9c3f;
@@ -393,7 +506,6 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.4);
 }
 
-/* $100 – black */
 .chip100 {
   background: radial-gradient(circle at 35% 35%, #424242 0%, #1a1a1a 60%, #000000 100%);
   border-color: #555;
@@ -401,39 +513,21 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
-.betTotal {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 32px;
-}
-
-.betTotalLabel {
-  font-size: 0.95rem;
-  color: rgba(255,255,255,0.8);
-}
-
-.betTotalValue {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #ffd54f;
-}
-
 .clearBetBtn {
-  padding: 4px 10px;
+  padding: 6px 14px;
   font-size: 0.8rem;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: rgba(255,255,255,0.9);
-  border-radius: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.85);
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, border-color 0.2s;
+  font-family: 'Outfit', sans-serif;
 }
 
 .clearBetBtn:hover {
-  background: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.4);
 }
 
 .primaryBtn {
@@ -460,6 +554,49 @@
   cursor: not-allowed;
 }
 
+.deckSelector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.deckLabel {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.8);
+}
+
+.deckButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.deckBtn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.2);
+  color: rgba(255,255,255,0.9);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.deckBtn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.4);
+}
+
+.deckBtnActive {
+  background: rgba(255,213,79,0.35);
+  border-color: rgba(255,213,79,0.7);
+  color: #ffd54f;
+}
+
+/* ===== Player action buttons ===== */
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -542,43 +679,230 @@
   background: rgba(150, 180, 255, 0.12);
 }
 
-.resultBanner {
-  margin-top: 10px;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1.2rem;
-  font-weight: 700;
+/* ===== Result overlay (centered, auto-dismiss) ===== */
+.resultOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  pointer-events: none;
+  animation: resultOverlayAnim 3s ease-in-out forwards;
+}
+
+.resultOverlayBox {
+  padding: 20px 52px;
+  background: rgba(0, 0, 0, 0.82);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 60px rgba(0,0,0,0.3);
+  backdrop-filter: blur(8px);
   text-align: center;
+  white-space: nowrap;
 }
 
-.resultWin {
-  color: #6bc98a;
-  text-shadow: 0 0 20px rgba(107, 201, 138, 0.4);
+.resultOverlayText {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.resultLoss {
-  color: #e07a7a;
+.resultOverlayWin {
+  color: #4ade80;
+  text-shadow: 0 0 24px rgba(74, 222, 128, 0.4);
 }
 
-.resultPush {
-  color: rgba(255,255,255,0.75);
+.resultOverlayBJ {
+  color: #ffd54f;
+  text-shadow: 0 0 24px rgba(255, 213, 79, 0.5);
 }
 
-.resultActions {
-  margin-top: 12px;
+.resultOverlayLoss {
+  color: #f87171;
+  text-shadow: 0 0 20px rgba(248, 113, 113, 0.3);
+}
+
+.resultOverlayPush {
+  color: #fbbf24;
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+@keyframes resultOverlayAnim {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  8% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  72% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}
+
+/* ===== Buy-in overlay ===== */
+.buyInOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  z-index: 95;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 50% 50% 12px 12px / 18% 18% 12px 12px;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.resultHint {
-  margin: 0;
+.buyInPrompt {
+  background: linear-gradient(180deg, rgba(20, 30, 20, 0.97), rgba(12, 18, 12, 0.97));
+  border: 2px solid rgba(255, 213, 79, 0.3);
+  border-radius: 20px;
+  padding: 32px 40px;
+  text-align: center;
+  max-width: 360px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+.buyInTitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #f87171;
+  margin-bottom: 12px;
+}
+
+.buyInDesc {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.buyInNote {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.buyInBtn {
+  padding: 14px 36px;
+  background: linear-gradient(180deg, #c9a227 0%, #a8841e 100%);
+  border: none;
+  border-radius: 12px;
+  color: #1a1a1a;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.buyInBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* ===== Insurance overlay ===== */
+.insuranceOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 50% 50% 12px 12px / 18% 18% 12px 12px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.insurancePrompt {
+  background: rgba(15, 25, 15, 0.96);
+  border: 2px solid rgba(255, 213, 79, 0.45);
+  border-radius: 16px;
+  padding: 28px 36px;
+  text-align: center;
+  max-width: 340px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+.insuranceTitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffd54f;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+}
+
+.insuranceDesc {
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 6px;
 }
 
+.insuranceCost {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffd54f;
+  margin-bottom: 18px;
+}
+
+.insuranceActions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.insuranceBtn {
+  padding: 10px 28px;
+  border-radius: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+}
+
+.insuranceBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+}
+
+.insuranceBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.insuranceBtnYes {
+  background: linear-gradient(180deg, #c9a227 0%, #a8841e 100%);
+  border-color: #c9a227;
+  color: #1a1a1a;
+}
+
+.insuranceBtnNo {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.9);
+}
+
+.insuranceBtnNo:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.45);
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* ===== Shuffle banner ===== */
 .shuffleBanner {
   position: absolute;
   top: 50%;
@@ -618,3 +942,9 @@
   background: rgba(255,255,255,0.18);
   border-color: rgba(255,255,255,0.45);
 }
+
+/* ===== Old result banner (hidden) ===== */
+.resultBanner { display: none; }
+.resultWin, .resultLoss, .resultPush { display: none; }
+.resultActions { display: none; }
+.resultHint { display: none; }

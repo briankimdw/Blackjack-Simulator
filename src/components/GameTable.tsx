@@ -7,6 +7,28 @@ import type { Hand, Card as CardType } from '../types';
 import type { GameStats } from '../types';
 import styles from './GameTable.module.css';
 
+/** Break a bet amount into chip denominations (greedy, largest first). */
+function breakdownBet(amount: number): number[] {
+  const chips: number[] = [];
+  let remaining = amount;
+  for (const d of [100, 25, 10, 5, 1]) {
+    while (remaining >= d) {
+      chips.push(d);
+      remaining -= d;
+    }
+  }
+  return chips;
+}
+
+/** Map chip value to CSS color class name. */
+function chipColorKey(value: number): string {
+  if (value >= 100) return 'chipColor100';
+  if (value >= 25) return 'chipColor25';
+  if (value >= 10) return 'chipColor10';
+  if (value >= 5) return 'chipColor5';
+  return 'chipColor1';
+}
+
 interface GameTableProps {
   phase: string;
   balance: number;
@@ -34,6 +56,13 @@ interface GameTableProps {
   double: () => void;
   split: () => void;
   runDealerAndSettle: () => void;
+  acceptInsurance: () => void;
+  declineInsurance: () => void;
+  buyIn: () => void;
+  buyInCount: number;
+  lifetimeEarnings: number;
+  playerName: string;
+  onOpenLeaderboard: () => void;
   newRound: () => void;
   startNewShoe: () => void;
   clearShuffleMessage: () => void;
@@ -43,7 +72,6 @@ interface GameTableProps {
   resetStats: () => void;
   canDouble: boolean;
   canSplit: boolean;
-  /** Optional image URLs for J, Q, K (e.g. custom animal pictures). */
   faceCardImageUrls?: Partial<Record<'J' | 'Q' | 'K', string>>;
 }
 
@@ -64,16 +92,21 @@ export function GameTable({
   trueCount,
   decksRemaining,
   stats,
-  setBet,
   addChip,
   clearBet,
   chipDenominations,
   deal,
   hit,
   stand,
-  double,
+  double: doubleFn,
   split,
   runDealerAndSettle,
+  acceptInsurance,
+  declineInsurance,
+  buyIn,
+  lifetimeEarnings,
+  playerName,
+  onOpenLeaderboard,
   newRound,
   startNewShoe,
   clearShuffleMessage,
@@ -88,6 +121,7 @@ export function GameTable({
   const [statsOpen, setStatsOpen] = useState(false);
   const [selectedChip, setSelectedChip] = useState<number | null>(null);
   const dealerAnimatedRef = useRef<Set<string>>(new Set());
+  const [overlayKey, setOverlayKey] = useState(0);
 
   const handleAddChipToBet = useCallback(
     (value: number) => {
@@ -135,6 +169,13 @@ export function GameTable({
     return () => clearTimeout(t);
   }, [showShuffleMessage, clearShuffleMessage]);
 
+  // Trigger result overlay animation on each new result
+  useEffect(() => {
+    if (phase === 'result') {
+      setOverlayKey((k) => k + 1);
+    }
+  }, [phase]);
+
   const isPlayerTurn = phase === 'player';
   const currentHand = playerHands[currentHandIndex];
   const handIs21 = currentHand && handValue(currentHand.cards) === 21;
@@ -152,6 +193,9 @@ export function GameTable({
     if (handValue(currentHand.cards) === 21) stand();
   }, [phase, currentHand, stand]);
 
+  const isBroke = balance === 0 && currentBet === 0 && (phase === 'bet' || phase === 'result');
+  const betChips = breakdownBet(currentBet);
+
   return (
     <div className={styles.table}>
       {showShuffleMessage && (
@@ -159,29 +203,86 @@ export function GameTable({
           Shuffling new shoe…
         </div>
       )}
-      <div className={styles.topBar}>
-        <div className={styles.balance}>
-          <span className={styles.balanceLabel}>Balance</span>
-          <span className={styles.balanceValue}>${balance}</span>
-        </div>
-        <div className={styles.countArea}>
-          <span className={styles.countLabel}>Count</span>
-          <CountReveal
-            runningCount={runningCount}
-            trueCount={trueCount}
-            decksRemaining={decksRemaining}
-          />
-        </div>
-        <button
-          type="button"
-          className={styles.statsBtn}
-          onClick={() => setStatsOpen(true)}
-        >
-          View stats
-        </button>
-      </div>
 
       <div className={styles.felt}>
+        {/* Info panel on felt */}
+        <div className={styles.infoPanel}>
+          {playerName && (
+            <div className={styles.infoPanelName}>{playerName}</div>
+          )}
+          <div className={styles.infoPanelRow}>
+            <div className={styles.infoItem}>
+              <span className={styles.infoItemLabel}>Balance</span>
+              <span className={styles.infoItemValue} style={{ color: '#8ae88a' }}>${balance}</span>
+            </div>
+            <div className={styles.infoItemDivider} />
+            <div className={styles.infoItem}>
+              <span className={styles.infoItemLabel}>Earnings</span>
+              <span
+                className={styles.infoItemValue}
+                style={{ color: lifetimeEarnings >= 0 ? '#8ae88a' : '#f87171' }}
+              >
+                {lifetimeEarnings >= 0 ? '+' : ''}{lifetimeEarnings}
+              </span>
+            </div>
+            <div className={styles.infoItemDivider} />
+            <div className={styles.infoItem}>
+              <span className={styles.infoItemLabel}>Count</span>
+              <CountReveal
+                runningCount={runningCount}
+                trueCount={trueCount}
+                decksRemaining={decksRemaining}
+              />
+            </div>
+          </div>
+          <div className={styles.infoPanelBtns}>
+            <button
+              type="button"
+              className={styles.infoPanelBtn}
+              onClick={() => setStatsOpen(true)}
+              title="Statistics"
+            >
+              📊
+            </button>
+            <button
+              type="button"
+              className={styles.infoPanelBtn}
+              onClick={onOpenLeaderboard}
+              title="Leaderboard"
+            >
+              🏆
+            </button>
+          </div>
+        </div>
+
+        {/* Curved rules text */}
+        <svg className={styles.curvedTextSvg} viewBox="0 0 500 85" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <path id="mainArc" d="M 25,78 Q 250,6 475,78" fill="none" />
+            <path id="subArc" d="M 55,78 Q 250,26 445,78" fill="none" />
+          </defs>
+          <text
+            fill="rgba(212,175,55,0.28)"
+            fontFamily="Georgia, 'Times New Roman', serif"
+            fontSize="15"
+            letterSpacing="3"
+          >
+            <textPath href="#mainArc" startOffset="50%" textAnchor="middle">
+              BLACKJACK PAYS 3 TO 2
+            </textPath>
+          </text>
+          <text
+            fill="rgba(212,175,55,0.18)"
+            fontFamily="Georgia, 'Times New Roman', serif"
+            fontSize="8.5"
+            letterSpacing="1.5"
+          >
+            <textPath href="#subArc" startOffset="50%" textAnchor="middle">
+              DEALER MUST STAND ON ALL 17s · INSURANCE PAYS 2 TO 1
+            </textPath>
+          </text>
+        </svg>
+
         <div className={styles.dealerArea}>
           <div className={styles.areaLabel}>Dealer</div>
           <div className={styles.hand}>
@@ -197,7 +298,7 @@ export function GameTable({
                   key={card.id}
                   card={card}
                   index={i}
-                  faceDown={phase === 'deal' || phase === 'player' ? i === 1 : false}
+                  faceDown={phase === 'deal' || phase === 'player' || phase === 'insurance' ? i === 1 : false}
                   animateDeal={shouldAnimate}
                   faceCardImageUrls={faceCardImageUrls}
                 />
@@ -206,12 +307,15 @@ export function GameTable({
           </div>
           {dealerHand.length > 0 && (
             <div className={styles.handValue}>
-              {phase === 'deal' || phase === 'player'
+              {phase === 'deal' || phase === 'player' || phase === 'insurance'
                 ? handDisplayValue(dealerHand.slice(0, 1))
                 : handDisplayValue(dealerHand)}
             </div>
           )}
         </div>
+
+        {/* Decorative arc separator */}
+        <div className={styles.tableArc} />
 
         <div className={styles.playerArea}>
           <div className={styles.hands}>
@@ -238,6 +342,7 @@ export function GameTable({
           </div>
 
           <div className={`${styles.betSection} ${phase !== 'bet' && phase !== 'result' ? styles.betSectionInPlay : ''}`}>
+            {/* Bet circle with chip visuals */}
             <div
               className={`${styles.betCircle} ${phase !== 'bet' && phase !== 'result' ? styles.betCircleInPlay : ''}`}
               onClick={phase === 'bet' || phase === 'result' ? handleBetAreaClick : undefined}
@@ -263,9 +368,21 @@ export function GameTable({
                   : `Current bet: $${currentBet}`
               }
             >
-              <span className={styles.betCircleTotal}>${currentBet}</span>
-              {selectedChip && (phase === 'bet' || phase === 'result') && (
-                <span className={styles.betCircleHint}>+${selectedChip} on click</span>
+              {currentBet > 0 ? (
+                <>
+                  <div className={styles.chipStack}>
+                    {betChips.slice(0, 8).map((chip, i) => (
+                      <div
+                        key={i}
+                        className={`${styles.stackedChip} ${styles[chipColorKey(chip)]}`}
+                        style={{ bottom: `${i * 3}px`, zIndex: i + 1 }}
+                      />
+                    ))}
+                  </div>
+                  <span className={styles.chipStackTotal}>${currentBet}</span>
+                </>
+              ) : (
+                <span className={styles.betCircleEmpty}>BET</span>
               )}
             </div>
             <div className={styles.chipTrayInline}>
@@ -329,38 +446,26 @@ export function GameTable({
                     Clear
                   </button>
                 )}
-                <button
-                  type="button"
-                  className={styles.primaryBtn}
-                  onClick={() => {
-                    if (phase === 'result') {
-                      newRound();
-                      setTimeout(deal, 0);
-                    } else {
-                      deal();
-                    }
-                  }}
-                  disabled={currentBet < minBet}
-                >
-                  Deal
-                </button>
+                {!isBroke && (
+                  <button
+                    type="button"
+                    className={styles.primaryBtn}
+                    onClick={() => {
+                      if (phase === 'result') {
+                        newRound();
+                        setTimeout(deal, 0);
+                      } else {
+                        deal();
+                      }
+                    }}
+                    disabled={currentBet < minBet}
+                  >
+                    Deal
+                  </button>
+                )}
               </div>
             )}
           </div>
-
-          {phase === 'result' && (
-            <div className={styles.resultBanner} aria-live="polite">
-              {lastRoundProfit > 0 && (
-                <span className={styles.resultWin}>You won +${lastRoundProfit}</span>
-              )}
-              {lastRoundProfit < 0 && (
-                <span className={styles.resultLoss}>You lost ${Math.abs(lastRoundProfit)}</span>
-              )}
-              {lastRoundProfit === 0 && (
-                <span className={styles.resultPush}>Push</span>
-              )}
-            </div>
-          )}
 
           {phase === 'player' && canAct && (
             <div className={styles.actions}>
@@ -373,7 +478,7 @@ export function GameTable({
                 <span className={styles.actionLabel}>Stand</span>
               </button>
               {canDouble && balance >= (currentHand?.bet ?? 0) && (
-                <button type="button" className={`${styles.actionBtn} ${styles.actionDouble}`} onClick={double} title="Double">
+                <button type="button" className={`${styles.actionBtn} ${styles.actionDouble}`} onClick={doubleFn} title="Double">
                   <span className={styles.actionSymbol}>2×</span>
                   <span className={styles.actionLabel}>Double</span>
                 </button>
@@ -388,6 +493,80 @@ export function GameTable({
           )}
 
         </div>
+
+        {/* Result overlay (centered, auto-fades) */}
+        {phase === 'result' && (
+          <div className={styles.resultOverlay} key={overlayKey}>
+            <div className={styles.resultOverlayBox}>
+              {lastRoundProfit > 0 && playerHands.some((h) => h.blackjack) && (
+                <div className={`${styles.resultOverlayText} ${styles.resultOverlayBJ}`}>
+                  Blackjack! +${lastRoundProfit}
+                </div>
+              )}
+              {lastRoundProfit > 0 && !playerHands.some((h) => h.blackjack) && (
+                <div className={`${styles.resultOverlayText} ${styles.resultOverlayWin}`}>
+                  Win +${lastRoundProfit}
+                </div>
+              )}
+              {lastRoundProfit < 0 && (
+                <div className={`${styles.resultOverlayText} ${styles.resultOverlayLoss}`}>
+                  Lose -${Math.abs(lastRoundProfit)}
+                </div>
+              )}
+              {lastRoundProfit === 0 && (
+                <div className={`${styles.resultOverlayText} ${styles.resultOverlayPush}`}>
+                  Push
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Buy-in overlay */}
+        {isBroke && (
+          <div className={styles.buyInOverlay}>
+            <div className={styles.buyInPrompt}>
+              <div className={styles.buyInTitle}>Out of chips!</div>
+              <div className={styles.buyInDesc}>Buy in for $1,000 to continue playing.</div>
+              <div className={styles.buyInNote}>This will count against your lifetime earnings.</div>
+              <button type="button" className={styles.buyInBtn} onClick={buyIn}>
+                Buy In — $1,000
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Insurance prompt overlay */}
+        {phase === 'insurance' && (
+          <div className={styles.insuranceOverlay}>
+            <div className={styles.insurancePrompt}>
+              <div className={styles.insuranceTitle}>Insurance?</div>
+              <div className={styles.insuranceDesc}>
+                Dealer is showing an Ace.
+              </div>
+              <div className={styles.insuranceCost}>
+                Cost: ${Math.floor((playerHands[0]?.bet ?? 0) / 2)}
+              </div>
+              <div className={styles.insuranceActions}>
+                <button
+                  type="button"
+                  className={`${styles.insuranceBtn} ${styles.insuranceBtnYes}`}
+                  onClick={acceptInsurance}
+                  disabled={balance < Math.floor((playerHands[0]?.bet ?? 0) / 2)}
+                >
+                  Yes
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.insuranceBtn} ${styles.insuranceBtnNo}`}
+                  onClick={declineInsurance}
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <StatsPanel

@@ -7,7 +7,7 @@ export interface Card {
   id: string;
 }
 
-export type GamePhase = 'bet' | 'deal' | 'player' | 'dealer' | 'result';
+export type GamePhase = 'bet' | 'deal' | 'insurance' | 'player' | 'dealer' | 'result';
 
 export interface Hand {
   cards: Card[];
@@ -43,3 +43,12 @@ export const INITIAL_STATS: GameStats = {
   minCount: 0,
   countHistory: [],
 };
+
+export interface LeaderboardEntry {
+  name: string;
+  totalInvested: number;
+  currentBalance: number;
+  handsPlayed: number;
+  bestBalance: number;
+  lastPlayed: number;
+}

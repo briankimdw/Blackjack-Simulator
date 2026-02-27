@@ -26,7 +26,7 @@ type GameState = {
   cutCardAt: number;
   playerHands: Hand[];
   dealerHand: Card[];
-  phase: 'bet' | 'deal' | 'player' | 'dealer' | 'result';
+  phase: 'bet' | 'deal' | 'insurance' | 'player' | 'dealer' | 'result';
   currentHandIndex: number;
   currentBet: number;
   runningCount: number;
@@ -35,6 +35,10 @@ type GameState = {
   showShuffleMessage: boolean;
   /** Net profit from the last completed round (positive = win, negative = loss, 0 = push). */
   lastRoundProfit: number;
+  /** Insurance bet amount (half the main bet). 0 if not taken. */
+  insuranceBet: number;
+  /** Number of additional buy-ins (first $1000 is free). */
+  buyInCount: number;
 };
 
 /** Cut card at 50–75% through the deck (shuffle when this many cards remain). */
@@ -66,6 +70,8 @@ const initialGameState: GameState = {
   shoeStarted: false,
   showShuffleMessage: false,
   lastRoundProfit: 0,
+  insuranceBet: 0,
+  buyInCount: 0,
 };
 
 function loadStats(): GameStats {
@@ -121,6 +127,9 @@ type Action =
   | { type: 'DOUBLE' }
   | { type: 'SPLIT' }
   | { type: 'DEALER_PLAY' }
+  | { type: 'ACCEPT_INSURANCE' }
+  | { type: 'DECLINE_INSURANCE' }
+  | { type: 'BUY_IN' }
   | { type: 'NEW_ROUND' }
   | { type: 'START_NEW_SHOE' }
   | { type: 'CLEAR_SHUFFLE_MESSAGE' }
@@ -170,7 +179,7 @@ function reducer(state: GameState, action: Action): GameState {
 
     case 'DEAL': {
       if (state.phase !== 'bet' || state.currentBet < MIN_BET) return state;
-      let s: GameState = { ...state };
+      let s: GameState = { ...state, insuranceBet: 0 };
       let result = draw(s, 2);
       const playerCards = result.cards;
       s = result.newState;
@@ -192,7 +201,15 @@ function reducer(state: GameState, action: Action): GameState {
         currentHandIndex: 0,
         shoeStarted: true,
       };
-      // Dealer has blackjack (e.g. K up, A hole): settle immediately, no player action
+      // Dealer shows Ace → offer insurance before anything else
+      if (dealerCards[0].rank === 'A') {
+        return {
+          ...dealtState,
+          phase: 'insurance' as const,
+          lastRoundProfit: 0,
+        };
+      }
+      // Dealer has blackjack with 10-value up card: settle immediately
       if (isBlackjack(dealerCards)) {
         return runSettlement(dealtState);
       }
@@ -315,6 +332,41 @@ function reducer(state: GameState, action: Action): GameState {
       return { ...nextState, phase: 'dealer' };
     }
 
+    case 'ACCEPT_INSURANCE': {
+      if (state.phase !== 'insurance') return state;
+      const mainBet = state.playerHands[0].bet;
+      const insuranceCost = Math.floor(mainBet / 2);
+      if (state.balance < insuranceCost) return state;
+      const s: GameState = { ...state, balance: state.balance - insuranceCost, insuranceBet: insuranceCost };
+      // Peek: dealer has blackjack → settle immediately (insurance pays 2:1)
+      if (isBlackjack(s.dealerHand)) {
+        return runSettlement(s);
+      }
+      // Dealer doesn't have BJ → insurance is lost, continue
+      const playerHasBJ = s.playerHands[0].blackjack;
+      return {
+        ...s,
+        phase: playerHasBJ ? 'dealer' : 'player',
+        lastRoundProfit: 0,
+      };
+    }
+
+    case 'DECLINE_INSURANCE': {
+      if (state.phase !== 'insurance') return state;
+      // Peek: dealer has blackjack → settle immediately
+      if (isBlackjack(state.dealerHand)) {
+        return runSettlement({ ...state, insuranceBet: 0 });
+      }
+      // No BJ, continue
+      const playerHasBJ = state.playerHands[0].blackjack;
+      return {
+        ...state,
+        phase: playerHasBJ ? 'dealer' : 'player',
+        lastRoundProfit: 0,
+        insuranceBet: 0,
+      };
+    }
+
     case 'NEW_ROUND':
       return {
         ...state,
@@ -331,6 +383,7 @@ function reducer(state: GameState, action: Action): GameState {
         shoeStarted: state.shoeStarted,
         showShuffleMessage: state.showShuffleMessage,
         lastRoundProfit: 0,
+        insuranceBet: 0,
       };
 
     case 'START_NEW_SHOE': {
@@ -346,6 +399,22 @@ function reducer(state: GameState, action: Action): GameState {
         currentBet: 0,
         shoeStarted: false,
         showShuffleMessage: false,
+        insuranceBet: 0,
+      };
+    }
+
+    case 'BUY_IN': {
+      if (state.balance > 0 || state.currentBet > 0) return state;
+      if (state.phase !== 'bet' && state.phase !== 'result') return state;
+      return {
+        ...state,
+        balance: INITIAL_BALANCE,
+        buyInCount: state.buyInCount + 1,
+        phase: 'bet',
+        playerHands: [],
+        dealerHand: [],
+        currentBet: 0,
+        lastRoundProfit: 0,
       };
     }
 
@@ -433,9 +502,20 @@ function runSettlement(state: GameState): GameState {
       stats.pushes++;
     }
   }
+  // Insurance accounting
+  if (state.insuranceBet > 0) {
+    totalBets += state.insuranceBet;
+    if (dealerBJ) {
+      // Insurance pays 2:1: return original bet + 2× profit
+      balance += state.insuranceBet * 3;
+      totalPayouts += state.insuranceBet * 3;
+    }
+    // If dealer doesn't have BJ, insurance is already lost (deducted from balance)
+  }
+
   saveStats(stats);
   const lastRoundProfit = totalPayouts - totalBets;
-  return { ...state, balance, stats, phase: 'result' as const, currentBet: 0, lastRoundProfit };
+  return { ...state, balance, stats, phase: 'result' as const, currentBet: 0, lastRoundProfit, insuranceBet: 0 };
 }
 
 export function useBlackjackGame() {
@@ -450,6 +530,9 @@ export function useBlackjackGame() {
   const double = useCallback(() => dispatch({ type: 'DOUBLE' }), []);
   const split = useCallback(() => dispatch({ type: 'SPLIT' }), []);
   const resetStats = useCallback(() => dispatch({ type: 'RESET_STATS' }), []);
+  const acceptInsurance = useCallback(() => dispatch({ type: 'ACCEPT_INSURANCE' }), []);
+  const declineInsurance = useCallback(() => dispatch({ type: 'DECLINE_INSURANCE' }), []);
+  const buyIn = useCallback(() => dispatch({ type: 'BUY_IN' }), []);
 
   const runDealerAndSettle = useCallback(() => {
     if (state.phase === 'dealer') dispatch({ type: 'DEALER_PLAY' });
@@ -487,6 +570,9 @@ export function useBlackjackGame() {
     startNewShoe,
     clearShuffleMessage,
     resetStats,
+    acceptInsurance,
+    declineInsurance,
+    buyIn,
     canDouble: currentHand ? canDouble(currentHand) : false,
     canSplit: currentHand ? canSplit(currentHand) : false,
     minBet: MIN_BET,
