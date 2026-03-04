@@ -63,6 +63,8 @@ interface GameTableProps {
   lifetimeEarnings: number;
   playerName: string;
   onOpenLeaderboard: () => void;
+  onOpenAuth: () => void;
+  isAuthenticated: boolean;
   newRound: () => void;
   startNewShoe: () => void;
   clearShuffleMessage: () => void;
@@ -107,6 +109,8 @@ export function GameTable({
   lifetimeEarnings,
   playerName,
   onOpenLeaderboard,
+  onOpenAuth,
+  isAuthenticated,
   newRound,
   startNewShoe,
   clearShuffleMessage,
@@ -252,6 +256,16 @@ export function GameTable({
             >
               🏆
             </button>
+            {!isAuthenticated && (
+              <button
+                type="button"
+                className={styles.infoPanelBtn}
+                onClick={onOpenAuth}
+                title="Sign In"
+              >
+                🔑
+              </button>
+            )}
           </div>
         </div>
 

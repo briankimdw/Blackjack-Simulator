@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { LeaderboardEntry } from '../types';
+import { apiGetLeaderboard, type LeaderboardEntry as ApiLeaderboardEntry, hasTokens } from '../api/client';
 
 const STORAGE_KEY_NAME = 'blackjack-playerName';
 const STORAGE_KEY_LB = 'blackjack-leaderboard';
 const BUY_IN_AMOUNT = 1000;
 
-function loadEntries(): LeaderboardEntry[] {
+function loadLocalEntries(): LeaderboardEntry[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY_LB);
     return data ? JSON.parse(data) : [];
@@ -14,10 +15,14 @@ function loadEntries(): LeaderboardEntry[] {
   }
 }
 
-function saveEntries(entries: LeaderboardEntry[]) {
+function saveLocalEntries(entries: LeaderboardEntry[]) {
   try {
     localStorage.setItem(STORAGE_KEY_LB, JSON.stringify(entries));
   } catch {}
+}
+
+export interface SortedEntry extends LeaderboardEntry {
+  earnings: number;
 }
 
 export function useLeaderboard(balance: number, buyInCount: number, handsPlayed: number) {
@@ -25,7 +30,9 @@ export function useLeaderboard(balance: number, buyInCount: number, handsPlayed:
     return localStorage.getItem(STORAGE_KEY_NAME) || '';
   });
 
-  const [entries, setEntries] = useState<LeaderboardEntry[]>(loadEntries);
+  const [localEntries, setLocalEntries] = useState<LeaderboardEntry[]>(loadLocalEntries);
+  const [apiEntries, setApiEntries] = useState<ApiLeaderboardEntry[]>([]);
+  const [isOnline, setIsOnline] = useState(false);
 
   const lifetimeEarnings = balance - (1 + buyInCount) * BUY_IN_AMOUNT;
 
@@ -37,10 +44,10 @@ export function useLeaderboard(balance: number, buyInCount: number, handsPlayed:
     } catch {}
   }, []);
 
-  // Update leaderboard entry whenever balance or handsPlayed changes
+  // Update local leaderboard entry whenever balance or handsPlayed changes
   useEffect(() => {
     if (!playerName) return;
-    setEntries((prev) => {
+    setLocalEntries((prev) => {
       const next = [...prev];
       const idx = next.findIndex((e) => e.name === playerName);
       const totalInvested = (1 + buyInCount) * BUY_IN_AMOUNT;
@@ -58,22 +65,62 @@ export function useLeaderboard(balance: number, buyInCount: number, handsPlayed:
       } else {
         next.push(entry);
       }
-      saveEntries(next);
+      saveLocalEntries(next);
       return next;
     });
   }, [playerName, balance, handsPlayed, buyInCount]);
 
-  const sorted = [...entries]
-    .map((e) => ({
-      ...e,
-      earnings: e.currentBalance - e.totalInvested,
-    }))
-    .sort((a, b) => b.earnings - a.earnings);
+  // Fetch backend leaderboard when authenticated
+  const fetchApiLeaderboard = useCallback(async () => {
+    if (!hasTokens()) {
+      setIsOnline(false);
+      return;
+    }
+    try {
+      const data = await apiGetLeaderboard();
+      setApiEntries(data);
+      setIsOnline(true);
+    } catch {
+      setIsOnline(false);
+    }
+  }, []);
+
+  // Fetch on mount and periodically
+  useEffect(() => {
+    fetchApiLeaderboard();
+    const interval = setInterval(fetchApiLeaderboard, 30000); // refresh every 30s
+    return () => clearInterval(interval);
+  }, [fetchApiLeaderboard]);
+
+  // Merge local + API entries for display
+  const sorted: SortedEntry[] = (() => {
+    if (isOnline && apiEntries.length > 0) {
+      // Use API leaderboard as primary source
+      return apiEntries.map((e) => ({
+        name: e.display_name || e.username,
+        totalInvested: 0,
+        currentBalance: e.total_profit,
+        handsPlayed: e.total_hands,
+        bestBalance: e.total_profit,
+        lastPlayed: Date.now(),
+        earnings: e.total_profit,
+      }));
+    }
+    // Fallback to local leaderboard
+    return [...localEntries]
+      .map((e) => ({
+        ...e,
+        earnings: e.currentBalance - e.totalInvested,
+      }))
+      .sort((a, b) => b.earnings - a.earnings);
+  })();
 
   return {
     playerName,
     setPlayerName,
     lifetimeEarnings,
     entries: sorted,
+    isOnline,
+    refreshLeaderboard: fetchApiLeaderboard,
   };
 }
